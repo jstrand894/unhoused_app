@@ -2,7 +2,7 @@
 
 <h1 align="center">Unhoused Reader Pro</h1>
 
-A Mac app for reading and relaunching **HOBO U23-001A (U23 Pro v2 Temp/RH)** data loggers over Onset's optical USB base station, without HOBOware. Read the data off a logger, save it as a clean CSV, and start it logging again: three steps, one window.
+A Mac app for reading and relaunching **HOBO U23-001A (U23 Pro v2 Temp/RH)** data loggers over Onset's optical USB base station, without HOBOware. Read the data off a logger, save it as a clean CSV, and start it logging again!
 
 ## Install
 
@@ -11,7 +11,7 @@ A Mac app for reading and relaunching **HOBO U23-001A (U23 Pro v2 Temp/RH)** dat
 3. First launch only: the app isn't notarized, so macOS blocks it. Open it once, then go to **System Settings, Privacy & Security** and click **Open Anyway**. (Older macOS: right-click the app, Open, Open.)
 4. Optional: right-click its Dock icon, then **Options, Keep in Dock**. In **Settings** (the gear) you can turn on *Open this app when a logger is plugged in*.
 
-You also need a HOBO U23-001A logger and its Onset optical USB base station (BASE-U-4) with the logger coupler. No Python or Homebrew needed.
+You also need a HOBO U23-001A logger and its Onset optical USB base station (BASE-U-4) with the logger coupler. Other base stations and loggers will probably work. Haven't tested though. 
 
 ## Before you start
 
