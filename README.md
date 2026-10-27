@@ -2,16 +2,20 @@
 
 A Mac app for reading and relaunching **HOBO U23-001A (U23 Pro v2 Temp/RH)** data loggers over Onset's optical USB base station, without HOBOware. Read the data off a logger, save it as a clean CSV, and start it logging again: three steps, one window.
 
-## What you need
-
-- A Mac (developed on Apple silicon, recent macOS).
-- A HOBO U23-001A logger and its Onset optical USB base station (BASE-U-4) with the logger coupler.
-- Python 3.10 or newer **with Tk**. The installer from python.org includes Tk (the app was built with Python 3.14 and Tk 8.6).
-- [Homebrew](https://brew.sh) and its `libusb`: `brew install libusb`.
-
 ## Install
 
-### Option A: run it from the source
+1. Download the latest **HOBO-Reader-x.y.z.dmg** from the [Releases page](https://github.com/jstrand894/hobo_app/releases).
+2. Open it and drag **HOBO Reader v2 Pro Max** onto **Applications**.
+3. First launch only: the app isn't notarized, so macOS blocks it. Open it once, then go to **System Settings, Privacy & Security** and click **Open Anyway**. (Older macOS: right-click the app, Open, Open.)
+4. Optional: right-click its Dock icon, then **Options, Keep in Dock**. In **Settings** (the gear) you can turn on *Open this app when a logger is plugged in*.
+
+You also need a HOBO U23-001A logger and its Onset optical USB base station (BASE-U-4) with the logger coupler. No Python or Homebrew needed.
+
+## Building from source
+
+Needs Python 3.10+ with Tk (python.org installer) and Homebrew `libusb` (`brew install libusb`).
+
+### Run from source
 
 ```bash
 git clone https://github.com/jstrand894/hobo_app.git
@@ -22,7 +26,7 @@ python3 -m venv .venv
 .venv/bin/python -m hobo gui
 ```
 
-### Option B: build the Mac app (recommended, gives you a Dock icon)
+### Build the app and DMG
 
 ```bash
 git clone https://github.com/jstrand894/hobo_app.git
@@ -31,6 +35,7 @@ brew install libusb
 python3 -m venv .venv
 .venv/bin/pip install -r requirements-dev.txt
 ./scripts/build_app.sh
+./scripts/build_dmg.sh   # add --release to publish to GitHub Releases
 ```
 
 This creates `dist/HOBO Reader v2 Pro Max.app` (libusb is bundled inside it). Then:

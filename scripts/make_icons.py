@@ -35,37 +35,72 @@ def halo(rgb, strength, size=44):
 
 
 def app_icon(size=1024):
-    n = size
+    """Blue squircle with one smooth data trace, a soft fill under it and a green 'live' marker at the end."""
+    n = size * 2                                   # draw at 2x, downscale for smooth edges
+    m = int(n * 0.098)                             # macOS icon grid: ~824/1024 body
+    box = [m, m, n - m, n - m]
     img = Image.new("RGBA", (n, n), (0, 0, 0, 0))
-    m = int(n * 0.06)
-    # vertical gradient background in a rounded square
     grad = Image.new("RGBA", (n, n))
     gd = ImageDraw.Draw(grad)
-    top, bot = (46, 134, 171), (20, 54, 92)
+    top, bot = (52, 150, 190), (18, 52, 96)
     for y in range(n):
         t = y / n
         gd.line([(0, y), (n, y)], fill=tuple(int(top[i] + (bot[i] - top[i]) * t) for i in range(3)) + (255,))
     mask = Image.new("L", (n, n), 0)
-    ImageDraw.Draw(mask).rounded_rectangle([m, m, n - m, n - m], radius=int(n * 0.22), fill=255)
+    ImageDraw.Draw(mask).rounded_rectangle(box, radius=int(n * 0.185), fill=255)
     img.paste(grad, (0, 0), mask)
-    d = ImageDraw.Draw(img)
-    # white data line with a slow wave, plus axis
-    w = int(n * 0.045)
+
+    # faint grid lines
+    grid = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    gd = ImageDraw.Draw(grid)
+    for f in (0.34, 0.50, 0.66):
+        gd.line([(n * 0.25, n * f), (n * 0.75, n * f)], fill=(255, 255, 255, 36), width=int(n * 0.008))
+    img = Image.alpha_composite(img, grid)
+
+    # the trace: one gentle rise, dip and climb
+    x0, x1 = n * 0.24, n * 0.76
     pts = []
-    for i in range(0, 101):
-        x = n * (0.20 + 0.60 * i / 100)
-        y = n * (0.55 - 0.16 * math.sin(i / 100 * 2 * math.pi * 1.4) - 0.06 * math.sin(i / 100 * 2 * math.pi * 4.3))
-        pts.append((x, y))
-    d.line([(n * .20, n * .72), (n * .80, n * .72)], fill=(255, 255, 255, 150), width=int(n * .015))
-    d.line([(n * .20, n * .30), (n * .20, n * .72)], fill=(255, 255, 255, 150), width=int(n * .015))
-    d.line(pts, fill="white", width=w, joint="curve")
-    for end in (pts[0], pts[-1]):
-        d.ellipse([end[0] - w / 2, end[1] - w / 2, end[0] + w / 2, end[1] + w / 2], fill="white")
-    # green "connected" dot
-    r = n * 0.075
-    cx, cy = n * 0.76, n * 0.27
-    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill="#4cd964", outline="white", width=int(n * .012))
-    return img
+    for i in range(1201):
+        t = i / 1200
+        y = n * (0.54 - 0.15 * math.sin(t * 2 * math.pi * 1.0 - 0.6) - 0.045 * math.sin(t * 2 * math.pi * 2.2))
+        pts.append((x0 + (x1 - x0) * t, y))
+
+    # soft fill under the line, fading downward
+    floor = n * 0.70
+    fill_mask = Image.new("L", (n, n), 0)
+    ImageDraw.Draw(fill_mask).polygon(pts + [(x1, floor), (x0, floor)], fill=255)
+    fade = Image.new("L", (n, n), 0)
+    fd = ImageDraw.Draw(fade)
+    for y in range(int(n * 0.30), int(floor)):
+        fd.line([(0, y), (n, y)], fill=int(110 * (1 - (y - n * 0.30) / (floor - n * 0.30))))
+    fill_a = ImageChops.multiply(fill_mask, fade)
+    fill_img = Image.new("RGBA", (n, n), (255, 255, 255, 0))
+    fill_img.putalpha(fill_a)
+    img = Image.alpha_composite(img, fill_img)
+
+    # drop shadow, then the line itself
+    w = int(n * 0.050)
+    shadow = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(shadow)
+    for x, y in pts:
+        sd.ellipse([x - w / 2, y + n * 0.012 - w / 2, x + w / 2, y + n * 0.012 + w / 2], fill=(5, 25, 50, 110))
+    img = Image.alpha_composite(img, shadow.filter(ImageFilter.GaussianBlur(n * 0.012)))
+    d = ImageDraw.Draw(img)
+    for x, y in pts:                               # stamped circles give a clean, round-capped stroke
+        d.ellipse([x - w / 2, y - w / 2, x + w / 2, y + w / 2], fill="white")
+
+    # live marker on the last reading: glow, white ring, green core
+    ex, ey = pts[-1]
+    glow = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    gr = n * 0.095
+    ImageDraw.Draw(glow).ellipse([ex - gr, ey - gr, ex + gr, ey + gr], fill=(76, 217, 100, 150))
+    img = Image.alpha_composite(img, glow.filter(ImageFilter.GaussianBlur(n * 0.03)))
+    d = ImageDraw.Draw(img)
+    r = n * 0.062
+    d.ellipse([ex - r, ey - r, ex + r, ey + r], fill="white")
+    r2 = r * 0.68
+    d.ellipse([ex - r2, ey - r2, ex + r2, ey + r2], fill="#35c759")
+    return img.resize((size, size), Image.LANCZOS)
 
 
 def main():
