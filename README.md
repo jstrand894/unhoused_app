@@ -1,4 +1,6 @@
-# Unhoused Reader Pro
+<p align="center"><img src="assets/icon.png" alt="Unhoused Reader Pro icon" width="128"></p>
+
+<h1 align="center">Unhoused Reader Pro</h1>
 
 A Mac app for reading and relaunching **HOBO U23-001A (U23 Pro v2 Temp/RH)** data loggers over Onset's optical USB base station, without HOBOware. Read the data off a logger, save it as a clean CSV, and start it logging again: three steps, one window.
 
