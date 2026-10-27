@@ -4,7 +4,7 @@ A Mac app for reading and relaunching **HOBO U23-001A (U23 Pro v2 Temp/RH)** dat
 
 ## Install
 
-1. Download the latest **Unhoused-Reader-Pro-x.y.z.dmg** from the [Releases page](https://github.com/jstrand894/unhoused_app/releases).
+1. [**Download Unhoused Reader Pro (.dmg)**](https://github.com/jstrand894/unhoused_app/releases/latest/download/Unhoused-Reader-Pro.dmg).
 2. Open it and drag **Unhoused Reader Pro** onto **Applications**.
 3. First launch only: the app isn't notarized, so macOS blocks it. Open it once, then go to **System Settings, Privacy & Security** and click **Open Anyway**. (Older macOS: right-click the app, Open, Open.)
 4. Optional: right-click its Dock icon, then **Options, Keep in Dock**. In **Settings** (the gear) you can turn on *Open this app when a logger is plugged in*.

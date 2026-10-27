@@ -7,7 +7,7 @@ NAME="Unhoused Reader Pro"
 APP="dist/$NAME.app"
 [ -d "$APP" ] || ./scripts/build_app.sh
 VERSION=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' hobo/version.py)
-DMG="dist/Unhoused-Reader-Pro-$VERSION.dmg"
+DMG="dist/Unhoused-Reader-Pro.dmg"
 STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
 
