@@ -10,11 +10,11 @@ import plistlib
 import subprocess
 import sys
 
-LABEL = "com.jstrand.hobo-reader.usb"
+LABEL = "com.jstrand.unhousedreader.usb"
 PLIST = os.path.expanduser(f"~/Library/LaunchAgents/{LABEL}.plist")
-SUPPORT = os.path.expanduser("~/Library/Application Support/HOBO Reader")
+SUPPORT = os.path.expanduser("~/Library/Application Support/Unhoused Reader Pro")
 SCRIPT = os.path.join(SUPPORT, "watch_usb.sh")
-INSTALLED = "/Applications/HOBO Reader v2 Pro Max.app"
+INSTALLED = "/Applications/Unhoused Reader Pro.app"
 POLL_SECONDS = 3
 
 SCRIPT_TEXT = r'''#!/bin/sh

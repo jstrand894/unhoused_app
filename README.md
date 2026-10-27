@@ -1,11 +1,11 @@
-# HOBO Reader v2 Pro Max
+# Unhoused Reader Pro
 
 A Mac app for reading and relaunching **HOBO U23-001A (U23 Pro v2 Temp/RH)** data loggers over Onset's optical USB base station, without HOBOware. Read the data off a logger, save it as a clean CSV, and start it logging again: three steps, one window.
 
 ## Install
 
-1. Download the latest **HOBO-Reader-x.y.z.dmg** from the [Releases page](https://github.com/jstrand894/hobo_app/releases).
-2. Open it and drag **HOBO Reader v2 Pro Max** onto **Applications**.
+1. Download the latest **Unhoused-Reader-Pro-x.y.z.dmg** from the [Releases page](https://github.com/jstrand894/unhoused_app/releases).
+2. Open it and drag **Unhoused Reader Pro** onto **Applications**.
 3. First launch only: the app isn't notarized, so macOS blocks it. Open it once, then go to **System Settings, Privacy & Security** and click **Open Anyway**. (Older macOS: right-click the app, Open, Open.)
 4. Optional: right-click its Dock icon, then **Options, Keep in Dock**. In **Settings** (the gear) you can turn on *Open this app when a logger is plugged in*.
 
@@ -18,8 +18,8 @@ Needs Python 3.10+ with Tk (python.org installer) and Homebrew `libusb` (`brew i
 ### Run from source
 
 ```bash
-git clone https://github.com/jstrand894/hobo_app.git
-cd hobo_app
+git clone https://github.com/jstrand894/unhoused_app.git
+cd unhoused_app
 brew install libusb
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
@@ -29,8 +29,8 @@ python3 -m venv .venv
 ### Build the app and DMG
 
 ```bash
-git clone https://github.com/jstrand894/hobo_app.git
-cd hobo_app
+git clone https://github.com/jstrand894/unhoused_app.git
+cd unhoused_app
 brew install libusb
 python3 -m venv .venv
 .venv/bin/pip install -r requirements-dev.txt
@@ -38,15 +38,15 @@ python3 -m venv .venv
 ./scripts/build_dmg.sh   # add --release to publish to GitHub Releases
 ```
 
-This creates `dist/HOBO Reader v2 Pro Max.app` (libusb is bundled inside it). Then:
+This creates `dist/Unhoused Reader Pro.app` (libusb is bundled inside it). Then:
 
 1. Drag the app into your **Applications** folder.
 2. Open it. Right-click its Dock icon, then **Options, Keep in Dock**.
 3. Optional: in **Settings** (the gear), turn on *Open this app when a logger is plugged in*. It needs the app to be in Applications first.
 
-A copy you built yourself opens without a security prompt. If you copy the app from another Mac and macOS refuses to open it, run `xattr -dr com.apple.quarantine "/Applications/HOBO Reader v2 Pro Max.app"` once.
+A copy you built yourself opens without a security prompt. If you copy the app from another Mac and macOS refuses to open it, run `xattr -dr com.apple.quarantine "/Applications/Unhoused Reader Pro.app"` once.
 
-To check that the app can reach a logger without opening a window: `"/Applications/HOBO Reader v2 Pro Max.app/Contents/MacOS/HOBO Reader v2 Pro Max" --selftest`
+To check that the app can reach a logger without opening a window: `"/Applications/Unhoused Reader Pro.app/Contents/MacOS/Unhoused Reader Pro" --selftest`
 
 ### Updating
 
@@ -110,7 +110,7 @@ git config core.hooksPath scripts/hooks  # turn on the commit hook that raises t
 
 The window tests drive the real UI against a fake logger (`tests/helpers.py`). They never touch real hardware, your settings file or launchd. The live tests are skipped when no logger is available.
 
-Your settings are kept in `~/.hobo_gui.json`. Auto-open uses a small launchd agent (`~/Library/LaunchAgents/com.jstrand.hobo-reader.usb.plist`) that you can remove from Settings.
+Your settings are kept in `~/.hobo_gui.json`. Auto-open uses a small launchd agent (`~/Library/LaunchAgents/com.jstrand.unhousedreader.usb.plist`) that you can remove from Settings.
 
 Layout: `hobo/` (`device.py` USB, `decode.py` readout to samples, `launch.py` launch, `actions.py` shared actions, `gui.py` and `widgets.py` window, `theme.py`, `autostart.py`), `scripts/`, `tests/`.
 

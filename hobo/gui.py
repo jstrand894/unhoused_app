@@ -24,7 +24,7 @@ LINK_TEXT = {"none": "No logger detected",
              "detected": "Adapter detected, can't read it (is HOBOware open?)",
              "ok": "Logger connected"}
 POLL_MS = 1500
-APP_NAME = "HOBO Reader v2 Pro Max"
+APP_NAME = "Unhoused Reader Pro"
 VALUE_W = {"Interval": 8, "Started": 17, "Running for": 10, "Samples": 7, "Memory": 23}
 UI_FONT = ".AppleSystemUIFont"                  # the system font (San Francisco on macOS)
 

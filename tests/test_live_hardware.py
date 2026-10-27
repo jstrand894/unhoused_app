@@ -105,18 +105,18 @@ class Destructive(unittest.TestCase):
 
 
 class InstalledApp(unittest.TestCase):
-    app = "/Applications/HOBO Reader v2 Pro Max.app"
+    app = "/Applications/Unhoused Reader Pro.app"
 
     @unittest.skipUnless(os.path.isdir(app), "app not installed")
     def test_bundle_version_matches_the_source(self):
         with open(os.path.join(self.app, "Contents", "Info.plist"), "rb") as f:
             plist = plistlib.load(f)
         self.assertEqual(plist["CFBundleShortVersionString"], __version__)
-        self.assertEqual(plist["CFBundleIdentifier"], "com.jstrand.hobologger")
+        self.assertEqual(plist["CFBundleIdentifier"], "com.jstrand.unhousedreader")
 
     @unittest.skipUnless(os.path.isdir(app) and device_available(), "app not installed or no logger available")
     def test_bundled_app_can_reach_the_logger(self):
-        exe = os.path.join(self.app, "Contents", "MacOS", "HOBO Reader v2 Pro Max")
+        exe = os.path.join(self.app, "Contents", "MacOS", "Unhoused Reader Pro")
         out = subprocess.run([exe, "--selftest"], capture_output=True, text=True, timeout=60).stdout
         self.assertIn("logger present: True", out)
         self.assertIn("serial", out)

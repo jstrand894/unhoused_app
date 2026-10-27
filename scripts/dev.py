@@ -3,7 +3,7 @@
     .venv/bin/python scripts/dev.py
 
 Edit and save a file; the window closes and reopens with the change in about a second. No rebuild needed.
-Ctrl-C to quit. (The installed "HOBO Logger.app" is a separate frozen copy and only updates when rebuilt.)
+Ctrl-C to quit. (The installed "Unhoused Reader Pro.app" is a separate frozen copy and only updates when rebuilt.)
 """
 import os
 import subprocess

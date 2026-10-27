@@ -1,13 +1,13 @@
 #!/bin/bash
-# Package dist/HOBO Reader v2 Pro Max.app into a drag-to-Applications DMG (builds the app first if missing).
+# Package dist/Unhoused Reader Pro.app into a drag-to-Applications DMG (builds the app first if missing).
 # Usage: scripts/build_dmg.sh [--release]   (--release also publishes it to GitHub Releases via gh)
 set -e
 cd "$(dirname "$0")/.."
-NAME="HOBO Reader v2 Pro Max"
+NAME="Unhoused Reader Pro"
 APP="dist/$NAME.app"
 [ -d "$APP" ] || ./scripts/build_app.sh
 VERSION=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' hobo/version.py)
-DMG="dist/HOBO-Reader-$VERSION.dmg"
+DMG="dist/Unhoused-Reader-Pro-$VERSION.dmg"
 STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
 
@@ -30,5 +30,5 @@ hdiutil create -volname "$NAME" -srcfolder "$STAGE" -fs HFS+ -format UDZO -ov "$
 echo "Built: $PWD/$DMG"
 
 if [ "$1" = "--release" ]; then
-    gh release create "v$VERSION" "$DMG" --title "HOBO Reader $VERSION" --notes "Download the DMG, drag the app to Applications, and follow READ ME FIRST.txt on first launch."
+    gh release create "v$VERSION" "$DMG" --title "Unhoused Reader Pro $VERSION" --notes "Download the DMG, drag the app to Applications, and follow READ ME FIRST.txt on first launch."
 fi
