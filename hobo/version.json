@@ -1,0 +1,27 @@
+{
+  "version": "1.0.11",
+  "pending": [],
+  "history": [
+    {
+      "version": "1.0.11",
+      "date": "2026-11-04",
+      "changes": [
+        "New: version history in Settings, and a notice at the top of the app after each update telling you what changed."
+      ]
+    },
+    {
+      "version": "1.0.10",
+      "date": "2026-11-04",
+      "changes": [
+        "New: Save Diagnostic Report (File menu or Settings). Saves a read-only troubleshooting file to your Desktop for when a logger won't read."
+      ]
+    },
+    {
+      "version": "1.0.9",
+      "date": "2026-11-03",
+      "changes": [
+        "Earlier improvements and fixes."
+      ]
+    }
+  ]
+}

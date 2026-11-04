@@ -1,5 +1,6 @@
 import contextlib
 import io
+import json
 import os
 import re
 import shutil
@@ -182,12 +183,12 @@ class VersionHook(unittest.TestCase):
         git("init", "-q", ".")
         os.makedirs(os.path.join(tmp, "hobo"))
         os.makedirs(os.path.join(tmp, "scripts", "hooks"))
-        shutil.copy(os.path.join(ROOT, "hobo", "version.py"), os.path.join(tmp, "hobo", "version.py"))
+        shutil.copy(os.path.join(ROOT, "hobo", "version.json"), os.path.join(tmp, "hobo", "version.json"))
         shutil.copy(os.path.join(ROOT, "scripts", "hooks", "pre-commit"), os.path.join(tmp, "scripts", "hooks", "pre-commit"))
         git("config", "core.hooksPath", "scripts/hooks")
         git("config", "user.email", "t@example.com")
         git("config", "user.name", "t")
-        version = lambda: re.search(r'__version__ = "(.*?)"', read(os.path.join(tmp, "hobo", "version.py"))).group(1)
+        version = lambda: json.loads(read(os.path.join(tmp, "hobo", "version.json")))["version"]
         start = [int(x) for x in version().split(".")]
         git("add", "-A"); git("commit", "-qm", "one")
         self.assertEqual(version(), f"{start[0]}.{start[1]}.{start[2] + 1}")
@@ -195,13 +196,15 @@ class VersionHook(unittest.TestCase):
         git("add", "-A"); git("commit", "-qm", "two")
         self.assertEqual(version(), f"{start[0]}.{start[1]}.{start[2] + 2}")
         # a manual bump is respected, and bumping continues from it
-        path = os.path.join(tmp, "hobo", "version.py")
-        write(path, read(path).replace(version(), "2.0.0"))
+        path = os.path.join(tmp, "hobo", "version.json")
+        write(path, read(path).replace(f'"version": "{version()}"', '"version": "2.0.0"', 1))
         git("add", "-A"); git("commit", "-qm", "manual")
         self.assertEqual(version(), "2.0.0")
         write(os.path.join(tmp, "b.txt"), "x")
         git("add", "-A"); git("commit", "-qm", "after manual")
         self.assertEqual(version(), "2.0.1")
+        hist = json.loads(read(os.path.join(tmp, "hobo", "version.json")))["history"]
+        self.assertEqual([h["version"] for h in hist][:2], ["2.0.1", "2.0.0"])
 
 
 if __name__ == "__main__":

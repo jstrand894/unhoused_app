@@ -1,19 +1,34 @@
 #!/bin/bash
-# Bump the patch version in hobo/version.py on every commit (1.0.0 -> 1.0.1 -> 1.0.2 ...).
-# Skipped if you already staged a different version yourself (e.g. a manual 1.1.0), or HOBO_NO_BUMP=1.
+# On every commit, raise the patch version in hobo/version.json (1.0.0 -> 1.0.1 ...) and move the notes in its
+# "pending" list into a new "history" entry for that version. Skipped if HOBO_NO_BUMP=1.
+# If you already changed "version" by hand since the last commit (e.g. 1.1.0), that version is kept.
 set -e
-FILE="hobo/version.py"
+FILE="hobo/version.json"
 [ -n "$HOBO_NO_BUMP" ] && exit 0
 [ -f "$FILE" ] || exit 0
-current=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' "$FILE")
-committed=$(git show "HEAD:$FILE" 2>/dev/null | sed -n 's/^__version__ = "\(.*\)"$/\1/p')
-# you changed the version by hand relative to the last commit: respect it
-if [ -n "$committed" ] && [ "$current" != "$committed" ]; then
-    git add "$FILE"
-    exit 0
-fi
-IFS=. read -r major minor patch <<< "$current"
-new="$major.$minor.$((patch + 1))"
-sed -i '' "s/^__version__ = \".*\"$/__version__ = \"$new\"/" "$FILE"
+committed=$(git show "HEAD:$FILE" 2>/dev/null || true)
+FILE="$FILE" COMMITTED="$committed" python3 - <<'PY'
+import json, os, datetime
+path = os.environ["FILE"]
+data = json.load(open(path))
+current = data["version"]
+try:
+    committed = json.loads(os.environ["COMMITTED"])["version"]
+except Exception:
+    committed = None
+if committed is not None and current != committed:
+    new = current                                   # bumped by hand: respect it
+else:
+    major, minor, patch = current.split(".")
+    new = f"{major}.{minor}.{int(patch) + 1}"
+data["version"] = new
+if not data["history"] or data["history"][0]["version"] != new:
+    notes = data.get("pending") or ["Small fixes and improvements."]
+    data["history"].insert(0, {"version": new, "date": datetime.date.today().isoformat(), "changes": notes})
+    data["pending"] = []
+with open(path, "w") as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
+    f.write("\n")
+print(f"version bumped: {current} -> {new}")
+PY
 git add "$FILE"
-echo "version bumped: $current -> $new"

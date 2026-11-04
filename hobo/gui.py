@@ -15,7 +15,7 @@ from .actions import describe, launch_logger, live, read_until_end, stop_logging
 from .decode import Readout
 from .device import Logger, logger_present
 from . import autostart, diagnose, theme
-from .version import __author__, __version__
+from .version import HISTORY, __author__, __version__, notes_for
 from .widgets import (Battery, Card, CheckItem, GearButton, IconButton, Light, MemoryBar, Pill, ProgressBar, Switch,
                       Tooltip, UnitSwitch, disc, round_rect)
 
@@ -316,6 +316,7 @@ class App(tk.Tk):
         self.bind("<<TkSystemAppearanceChanged>>", lambda e: self._retheme())
         self.after(100, self._pump)
         self.after(300, self._poll)
+        self.after(600, self._announce_update)
 
     def muted(self, parent, text, kind="muted", **kw):
         """A label in a secondary text colour that follows light/dark mode."""
@@ -700,7 +701,7 @@ class App(tk.Tk):
         result()  # the callback returned by the worker, runs on the UI thread
 
     # ---- actions ----
-    DEFAULTS = {"last_dir": None, "celsius": False, "save_hobo": True, "ask_each_time": True}
+    DEFAULTS = {"last_dir": None, "celsius": False, "save_hobo": True, "ask_each_time": True, "last_seen_version": None}
 
     @classmethod
     def _load_cfg(cls):
@@ -1092,13 +1093,46 @@ class App(tk.Tk):
             row=9, column=0, columnspan=2, sticky="w")
         ttk.Label(body, text=APP_NAME, font=(UI_FONT, 15, "bold")).grid(
             row=10, column=0, columnspan=2, sticky="w", pady=(4, 0))
-        ttk.Label(body, text=f"Version {__version__}").grid(row=11, column=0, columnspan=2, sticky="w")
+        vrow = ttk.Frame(body)
+        vrow.grid(row=11, column=0, columnspan=2, sticky="w")
+        ttk.Label(vrow, text=f"Version {__version__}").pack(side="left")
+        ttk.Button(vrow, text="Version history", command=self.show_history).pack(side="left", padx=10)
         ttk.Label(body, text=f"Built by {__author__}").grid(row=12, column=0, columnspan=2, sticky="w")
         self.muted(body, "Reads HOBO U23-001A (U23 Pro v2) loggers over the optical USB base station.", "muted2",
                    wraplength=360).grid(row=13, column=0, columnspan=2, sticky="w", pady=(6, 0))
         ttk.Button(body, text="Done", command=dlg.destroy).grid(row=14, column=0, columnspan=2, sticky="e", pady=(14, 0))
         dlg.bind("<Escape>", lambda e: dlg.destroy())
         dlg.grab_set()
+
+    def _announce_update(self):
+        """After an update, show what changed in a notice at the top of the window (once per version)."""
+        if self.cfg.get("last_seen_version") == __version__:
+            return
+        self.cfg["last_seen_version"] = __version__
+        self._save_cfg()
+        notes = notes_for(__version__)
+        if notes:
+            self.notify("whatsnew", "info", f"Updated to version {__version__}. What's new: " + "  ".join(notes),
+                        actions=(("Version history", self.show_history),))
+
+    def show_history(self):
+        dlg = tk.Toplevel(self)
+        dlg.title("Version history")
+        dlg.transient(self)
+        body = ttk.Frame(dlg, padding=14)
+        body.pack(fill="both", expand=True)
+        text = tk.Text(body, width=64, height=22, wrap="word", font=(UI_FONT, 12), relief="flat", padx=8, pady=6)
+        bar = ttk.Scrollbar(body, command=text.yview)
+        text.config(yscrollcommand=bar.set)
+        text.tag_configure("v", font=(UI_FONT, 13, "bold"), spacing1=10)
+        for e in HISTORY:
+            text.insert("end", f"Version {e['version']}   {e.get('date', '')}\n", "v")
+            for c in e.get("changes", []):
+                text.insert("end", f"  •  {c}\n")
+        text.config(state="disabled")
+        text.pack(side="left", fill="both", expand=True)
+        bar.pack(side="right", fill="y")
+        dlg.bind("<Escape>", lambda ev: dlg.destroy())
 
     def save_diagnostics(self):
         """Write a read-only troubleshooting report to the Desktop and show it in Finder. Works with no logger."""

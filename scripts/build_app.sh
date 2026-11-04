@@ -9,10 +9,11 @@ for i in 1 2 3 4 5; do rm -rf build dist && break; sleep 1; done   # Finder may 
     --icon assets/app.icns \
     --osx-bundle-identifier com.jstrand.unhousedreader \
     --add-data "hobo/assets:hobo/assets" \
+    --add-data "hobo/version.json:hobo" \
     --add-binary "$LIBUSB:." \
     run_app.py
 # stamp the version into the bundle (shows in Finder > Get Info) and re-sign, since editing breaks the signature
-VERSION=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' hobo/version.py)
+VERSION=$(python3 -c 'import json;print(json.load(open("hobo/version.json"))["version"])')
 APP="dist/Unhoused Reader Pro.app"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$APP/Contents/Info.plist" 2>/dev/null || \
     /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $VERSION" "$APP/Contents/Info.plist"
