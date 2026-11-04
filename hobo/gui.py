@@ -14,7 +14,7 @@ from tkinter import filedialog, messagebox, ttk
 from .actions import describe, launch_logger, live, read_until_end, stop_logging, write_files
 from .decode import Readout
 from .device import Logger, logger_present
-from . import autostart, diagnose, theme
+from . import autostart, diagnose, theme, updates
 from .version import HISTORY, __author__, __version__, notes_for
 from .widgets import (Battery, Card, CheckItem, GearButton, IconButton, Light, MemoryBar, Pill, ProgressBar, Switch,
                       Tooltip, UnitSwitch, disc, round_rect)
@@ -445,6 +445,7 @@ class App(tk.Tk):
             self.bind_all(f"<Command-{key}>", lambda e, b=btn, c=cmd: c() if b.state == "normal" else None)
         filem.add_separator()
         filem.add_command(label="Save Diagnostic Report…", command=self.save_diagnostics)
+        filem.add_command(label="Check for Updates…", command=self.check_updates)
         self.config(menu=bar)
         self._sync_menu()
 
@@ -1097,6 +1098,8 @@ class App(tk.Tk):
         vrow.grid(row=11, column=0, columnspan=2, sticky="w")
         ttk.Label(vrow, text=f"Version {__version__}").pack(side="left")
         ttk.Button(vrow, text="Version history", command=self.show_history).pack(side="left", padx=10)
+        ttk.Button(vrow, text="Check for updates", command=lambda: (dlg.destroy(), self.check_updates())).pack(
+            side="left")
         ttk.Label(body, text=f"Built by {__author__}").grid(row=12, column=0, columnspan=2, sticky="w")
         self.muted(body, "Reads HOBO U23-001A (U23 Pro v2) loggers over the optical USB base station.", "muted2",
                    wraplength=360).grid(row=13, column=0, columnspan=2, sticky="w", pady=(6, 0))
@@ -1114,6 +1117,32 @@ class App(tk.Tk):
         if notes:
             self.notify("whatsnew", "info", f"Updated to version {__version__}. What's new: " + "  ".join(notes),
                         actions=(("Version history", self.show_history),))
+
+    def check_updates(self):
+        """Ask GitHub for the newest release and say whether this copy is out of date."""
+        if self.busy:
+            return
+        self.set_busy(True, "Checking for updates…")
+
+        def work():
+            try:
+                latest = updates.latest_release()[0]
+                err = None
+            except Exception as e:  # noqa: BLE001 - offline, rate limited, or no release published yet
+                latest, err = None, e
+            return lambda: self._updates_done(latest, err)
+        self.run_bg(work)
+
+    def _updates_done(self, latest, err):
+        self.msg.set("")
+        if err is not None:
+            self.notify("update", "warn", "Couldn't check for updates (are you online?).", timeout=10000)
+        elif updates.is_newer(latest, __version__):
+            self.notify("update", "info", f"Version {latest} is available (you have {__version__}). Download it, "
+                        "then drag it into Applications to replace this copy.",
+                        actions=(("Download", lambda: self._open_path(updates.DMG)),))
+        else:
+            self.notify("update", "ok", f"You're up to date (version {__version__}).", timeout=8000)
 
     def show_history(self):
         dlg = tk.Toplevel(self)

@@ -1,7 +1,14 @@
 {
-  "version": "1.0.15",
+  "version": "1.0.16",
   "pending": [],
   "history": [
+    {
+      "version": "1.0.16",
+      "date": "2026-11-04",
+      "changes": [
+        "New: Check for Updates (File menu or Settings) tells you when a newer version is available and links to the download."
+      ]
+    },
     {
       "version": "1.0.15",
       "date": "2026-11-04",

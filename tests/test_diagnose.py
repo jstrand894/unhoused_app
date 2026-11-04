@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-from hobo import diagnose
+from hobo import diagnose, updates
 
 
 class DiagnoseTests(unittest.TestCase):
@@ -20,6 +20,12 @@ class DiagnoseTests(unittest.TestCase):
         p = diagnose.default_path()
         self.assertTrue(os.path.basename(p).startswith("Unhoused-diagnostics-"))
         self.assertTrue(p.endswith(".txt"))
+
+    def test_version_comparison(self):
+        self.assertTrue(updates.is_newer("1.0.16", "1.0.15"))
+        self.assertTrue(updates.is_newer("v1.1.0", "1.0.99"))
+        self.assertFalse(updates.is_newer("1.0.15", "1.0.15"))
+        self.assertFalse(updates.is_newer("junk", "1.0.15"))
 
 
 if __name__ == "__main__":
