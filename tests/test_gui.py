@@ -49,6 +49,7 @@ class GuiCase(unittest.TestCase):
             return f
         patches = [
             (gui, "CONFIG", os.path.join(self.tmp, "cfg.json")),
+            (gui.updates, "latest_release", mock.Mock(side_effect=OSError("offline in tests"))),
             (gui, "Logger", lambda: FakeLogger(self.device)),
             (gui, "logger_present", lambda: self.device.present),
             (autostart, "is_enabled", lambda: self.auto["enabled"]),
@@ -151,6 +152,20 @@ class Startup(GuiCase):
             a.gear.event_generate("<ButtonRelease-1>", x=5, y=5)
             a.update()
             opened.assert_called_once()
+
+    def test_update_available_asks_and_remembers_a_skip(self):
+        a = self.app
+        self.spin(0.3)
+        self.answers["yesno"] = False
+        self.asked.clear()
+        with mock.patch.object(gui.updates, "can_self_update", return_value=True):
+            a._updates_done(("9.9.9", "http://x/y.dmg"), None, True)
+        self.assertEqual(len(self.asked), 1)
+        self.assertEqual(a.cfg["skipped_version"], "9.9.9")
+        a._updates_done(("9.9.9", "http://x/y.dmg"), None, True)      # quiet launch check: no second prompt
+        self.assertEqual(len(self.asked), 1)
+        a._updates_done(("9.9.9", "http://x/y.dmg"), None, False)     # manual check always asks
+        self.assertEqual(len(self.asked), 2)
 
     def test_no_logger_state(self):
         a = self.app

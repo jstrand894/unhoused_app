@@ -1,4 +1,5 @@
 import os
+import subprocess
 import tempfile
 import unittest
 from unittest import mock
@@ -26,6 +27,22 @@ class DiagnoseTests(unittest.TestCase):
         self.assertTrue(updates.is_newer("v1.1.0", "1.0.99"))
         self.assertFalse(updates.is_newer("1.0.15", "1.0.15"))
         self.assertFalse(updates.is_newer("junk", "1.0.15"))
+
+    def test_swap_script_replaces_the_app_and_cleans_up(self):
+        with tempfile.TemporaryDirectory() as d:
+            target, stage = os.path.join(d, "App.app"), os.path.join(d, "stage", "App.app")
+            os.makedirs(target); os.makedirs(stage)
+            open(os.path.join(target, "v"), "w").write("old")
+            open(os.path.join(stage, "v"), "w").write("new")
+            script = os.path.join(d, "stage", "swap.sh")
+            open(script, "w").write(updates.swap_script(999999, target, stage, opener="true"))
+            subprocess.run(["/bin/bash", script], check=True, timeout=20)
+            self.assertEqual(open(os.path.join(target, "v")).read(), "new")
+            self.assertFalse(os.path.exists(target + ".old"))
+            self.assertFalse(os.path.exists(os.path.join(d, "stage")))
+
+    def test_running_from_source_cannot_self_update(self):
+        self.assertFalse(updates.can_self_update())
 
 
 if __name__ == "__main__":

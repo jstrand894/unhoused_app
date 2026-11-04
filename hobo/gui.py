@@ -3,6 +3,7 @@ import bisect
 import json
 import os
 import queue
+import shutil
 import subprocess
 import sys
 import threading
@@ -317,6 +318,7 @@ class App(tk.Tk):
         self.after(100, self._pump)
         self.after(300, self._poll)
         self.after(600, self._announce_update)
+        self.after(2500, lambda: self.check_updates(auto=True))
 
     def muted(self, parent, text, kind="muted", **kw):
         """A label in a secondary text colour that follows light/dark mode."""
@@ -704,7 +706,7 @@ class App(tk.Tk):
         result()  # the callback returned by the worker, runs on the UI thread
 
     # ---- actions ----
-    DEFAULTS = {"last_dir": None, "celsius": False, "save_hobo": True, "ask_each_time": True, "last_seen_version": None}
+    DEFAULTS = {"last_dir": None, "celsius": False, "save_hobo": True, "ask_each_time": True, "last_seen_version": None, "skipped_version": None}
 
     @classmethod
     def _load_cfg(cls):
@@ -1120,31 +1122,83 @@ class App(tk.Tk):
             self.notify("whatsnew", "info", f"Updated to version {__version__}. What's new: " + "  ".join(notes),
                         actions=(("Version history", self.show_history),))
 
-    def check_updates(self):
-        """Ask GitHub for the newest release and say whether this copy is out of date."""
+    def check_updates(self, auto=False):
+        """Ask GitHub for the newest release. auto=True is the quiet check at launch: it only speaks up when there
+        is a newer version the user hasn't skipped, and never blocks the window."""
+        if auto:
+            def quiet():
+                try:
+                    self.q.put(("updcheck", (updates.latest_release(), None, True)))
+                except Exception:  # noqa: BLE001 - offline in the field is normal
+                    pass
+            threading.Thread(target=quiet, daemon=True).start()
+            return
         if self.busy:
             return
         self.set_busy(True, "Checking for updates…")
 
         def work():
             try:
-                latest = updates.latest_release()[0]
-                err = None
+                latest, err = updates.latest_release(), None
             except Exception as e:  # noqa: BLE001 - offline, rate limited, or no release published yet
                 latest, err = None, e
-            return lambda: self._updates_done(latest, err)
+            return lambda: self._updates_done(latest, err, False)
         self.run_bg(work)
 
-    def _updates_done(self, latest, err):
-        self.msg.set("")
+    def _on_updcheck(self, payload):
+        if not self.busy:
+            self._updates_done(*payload)
+
+    def _updates_done(self, latest, err, auto):
+        if not auto:
+            self.msg.set("")
         if err is not None:
             self.notify("update", "warn", "Couldn't check for updates (are you online?).", timeout=10000)
-        elif updates.is_newer(latest, __version__):
-            self.notify("update", "info", f"Version {latest} is available (you have {__version__}). Download it, "
-                        "then drag it into Applications to replace this copy.",
-                        actions=(("Download", lambda: self._open_path(updates.DMG)),))
+            return
+        version, url = latest
+        if not updates.is_newer(version, __version__):
+            if not auto:
+                self.notify("update", "ok", f"You're up to date (version {__version__}).", timeout=8000)
+            return
+        if auto and self.cfg.get("skipped_version") == version:
+            return                                      # the user already said no to this one
+        can = updates.can_self_update()
+        if can:
+            self.notify("update", "info", f"Version {version} is available (you have {__version__}).",
+                        actions=(("Install and restart", lambda: self.install_update(version, url)),))
         else:
-            self.notify("update", "ok", f"You're up to date (version {__version__}).", timeout=8000)
+            self.notify("update", "info", f"Version {version} is available (you have {__version__}). Download "
+                        "it, then drag it into Applications to replace this copy.",
+                        actions=(("Download", lambda: self._open_path(url)),))
+        ask = (f"Version {version} is available. You have {__version__}.\n\n"
+               + ("Install it now? The app will restart." if can else "Open the download page?")
+               + "\n\nChoose No to skip this version. You can still update later from Check for Updates.")
+        if messagebox.askyesno("Update available", ask, parent=self):
+            self.install_update(version, url) if can else self._open_path(url)
+        else:
+            self.cfg["skipped_version"] = version
+            self._save_cfg()
+
+    def install_update(self, version, url):
+        """Download the new version, then (after a confirmation) swap it in and relaunch."""
+        if self.busy:
+            return
+        self.dismiss("update")
+        self.set_busy(True, f"Downloading version {version}…")
+
+        def work():
+            staged = updates.stage_update(url, progress=lambda d, t: self.q.put(("progress", (d, t))))
+            return lambda: self._update_ready(version, staged)
+        self.run_bg(work)
+
+    def _update_ready(self, version, staged):
+        self.msg.set("")
+        if messagebox.askyesno("Install update", f"Version {version} is ready. Quit and reopen the app now to "
+                               "finish installing it?", parent=self):
+            updates.launch_swap(staged)
+            self.destroy()
+        else:
+            shutil.rmtree(os.path.dirname(staged), ignore_errors=True)
 
     def show_history(self):
         dlg = tk.Toplevel(self)
