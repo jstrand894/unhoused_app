@@ -1,7 +1,14 @@
 {
-  "version": "1.0.20",
+  "version": "1.0.21",
   "pending": [],
   "history": [
+    {
+      "version": "1.0.21",
+      "date": "2026-11-04",
+      "changes": [
+        "Test release to try updating from inside the app. Nothing else changed."
+      ]
+    },
     {
       "version": "1.0.20",
       "date": "2026-11-04",
