@@ -14,7 +14,7 @@ from tkinter import filedialog, messagebox, ttk
 from .actions import describe, launch_logger, live, read_until_end, stop_logging, write_files
 from .decode import Readout
 from .device import Logger, logger_present
-from . import autostart, theme
+from . import autostart, diagnose, theme
 from .version import __author__, __version__
 from .widgets import (Battery, Card, CheckItem, GearButton, IconButton, Light, MemoryBar, Pill, ProgressBar, Switch,
                       Tooltip, UnitSwitch, disc, round_rect)
@@ -442,6 +442,8 @@ class App(tk.Tk):
             filem.add_command(label=label, accelerator=f"Cmd+{key.upper() if key != '.' else '.'}", command=cmd)
             self._menu_entries.append((filem, i, btn))
             self.bind_all(f"<Command-{key}>", lambda e, b=btn, c=cmd: c() if b.state == "normal" else None)
+        filem.add_separator()
+        filem.add_command(label="Save Diagnostic Report…", command=self.save_diagnostics)
         self.config(menu=bar)
         self._sync_menu()
 
@@ -1082,6 +1084,8 @@ class App(tk.Tk):
         ttk.Button(btns, text="Choose…", command=choose).pack(side="left")
         ttk.Button(btns, text="Show in Finder", command=lambda: os.system(f'open "{self.last_dir}"')).pack(
             side="left", padx=8)
+        ttk.Button(btns, text="Save diagnostic report", command=lambda: (dlg.destroy(), self.save_diagnostics())).pack(
+            side="left")
 
         ttk.Separator(body).grid(row=8, column=0, columnspan=2, sticky="ew", pady=16)
         self.muted(body, "ABOUT", "muted2", font=(UI_FONT, 10, "bold")).grid(
@@ -1095,6 +1099,24 @@ class App(tk.Tk):
         ttk.Button(body, text="Done", command=dlg.destroy).grid(row=14, column=0, columnspan=2, sticky="e", pady=(14, 0))
         dlg.bind("<Escape>", lambda e: dlg.destroy())
         dlg.grab_set()
+
+    def save_diagnostics(self):
+        """Write a read-only troubleshooting report to the Desktop and show it in Finder. Works with no logger."""
+        if self.busy:
+            return
+        context = {"link": self.link, "status line": LINK_TEXT.get(self.link), "message": self.msg.get(),
+                   "logger_info": self.logger_info}
+        self.set_busy(True, "Collecting diagnostics… (about 30 seconds)")
+
+        def work():
+            path = diagnose.write_report(context=context)
+            return lambda: self._diagnostics_done(path)
+        self.run_bg(work)
+
+    def _diagnostics_done(self, path):
+        self.msg.set(f"Diagnostic report saved: {path}")
+        self.notify("diag", "info", f"Diagnostic report saved to your Desktop ({os.path.basename(path)}). "
+                    "Send that file.", actions=(("Show in Finder", lambda: self._reveal(path)),))
 
     def readout_device(self):
         """Step 1: stop the logger (if it is logging), read all its data into the app, and plot it."""

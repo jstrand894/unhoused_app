@@ -50,6 +50,12 @@ def cmd_launch(args):
     print("logging" if d["logging"] else "not logging", f"- interval {d['interval_s']} s, name {d['name']}")
 
 
+def cmd_diagnose(args):
+    from .diagnose import write_report
+    print("Collecting diagnostics (about 30 s)...", file=sys.stderr)
+    print("Wrote", write_report(args.output))
+
+
 def cmd_gui(_):
     from .gui import run
     run()
@@ -71,6 +77,9 @@ def main():
     la.add_argument("-n", "--name", help="logger name (default: keep the current name)")
     la.add_argument("-y", "--yes", action="store_true", help="do not ask for confirmation")
     la.set_defaults(fn=cmd_launch)
+    dg = sub.add_parser("diagnose", help="save a report for troubleshooting a logger that won't read (read-only)")
+    dg.add_argument("-o", "--output", help="report file (default: a new file on the Desktop)")
+    dg.set_defaults(fn=cmd_diagnose)
     sub.add_parser("gui", help="open the window").set_defaults(fn=cmd_gui)
     args = p.parse_args()
     args.fn(args)
