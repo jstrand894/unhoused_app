@@ -131,6 +131,14 @@ class Startup(GuiCase):
         a._announce_update()
         self.assertNotIn("whatsnew", a._notices)
 
+    def test_notice_area_collapses_when_dismissed(self):
+        a = self.app
+        self.spin(1.0)
+        a.update_idletasks()
+        a.dismiss("whatsnew")
+        a.update_idletasks()
+        self.assertLessEqual(a.notices.winfo_height(), 1)
+
     def test_no_logger_state(self):
         a = self.app
         self.spin(0.5)

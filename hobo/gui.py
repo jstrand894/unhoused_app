@@ -385,6 +385,8 @@ class App(tk.Tk):
         entry = self._notices.pop(key, None)
         if entry and entry[0].winfo_exists():
             entry[0].destroy()
+        if not self.notices.winfo_children():
+            self.notices.config(height=1)       # an emptied frame would otherwise keep its old height
 
     def _update_alerts(self, d):
         """Standing warnings about the connected logger."""

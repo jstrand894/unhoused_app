@@ -1,7 +1,14 @@
 {
-  "version": "1.0.16",
+  "version": "1.0.17",
   "pending": [],
   "history": [
+    {
+      "version": "1.0.17",
+      "date": "2026-11-04",
+      "changes": [
+        "Fixed: the window no longer keeps an empty gap at the top after a notice is dismissed."
+      ]
+    },
     {
       "version": "1.0.16",
       "date": "2026-11-04",
