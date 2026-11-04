@@ -1,7 +1,14 @@
 {
-  "version": "1.0.18",
+  "version": "1.0.19",
   "pending": [],
   "history": [
+    {
+      "version": "1.0.19",
+      "date": "2026-11-04",
+      "changes": [
+        "Fixed: dismissing a notice or choosing Check for Updates no longer opens Settings by accident."
+      ]
+    },
     {
       "version": "1.0.18",
       "date": "2026-11-04",

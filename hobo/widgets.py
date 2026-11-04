@@ -355,8 +355,15 @@ class GearButton(tk.Canvas):
         self.hover = False
         self.bind("<Enter>", lambda e: self._set(True))
         self.bind("<Leave>", lambda e: self._set(False))
-        self.bind("<ButtonRelease-1>", lambda e: command() if 0 <= e.x <= size and 0 <= e.y <= size else None)
+        self._pressed = False      # only a click that started on the gear counts, not a release that lands here
+        self.bind("<ButtonPress-1>", lambda e: setattr(self, "_pressed", True))
+        self.bind("<ButtonRelease-1>", self._release)
         self.draw()
+
+    def _release(self, e):
+        pressed, self._pressed = self._pressed, False
+        if pressed and 0 <= e.x <= self.size and 0 <= e.y <= self.size:
+            self.command()
 
     def _set(self, hover):
         self.hover = hover

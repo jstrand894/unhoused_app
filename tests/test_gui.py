@@ -139,6 +139,19 @@ class Startup(GuiCase):
         a.update_idletasks()
         self.assertLessEqual(a.notices.winfo_height(), 1)
 
+    def test_gear_ignores_a_release_that_did_not_start_on_it(self):
+        a = self.app
+        self.spin(0.5)
+        with mock.patch.object(a, "open_settings") as opened:
+            a.gear.command = a.open_settings
+            a.gear.event_generate("<ButtonRelease-1>", x=5, y=5)
+            a.update()
+            opened.assert_not_called()
+            a.gear.event_generate("<ButtonPress-1>", x=5, y=5)
+            a.gear.event_generate("<ButtonRelease-1>", x=5, y=5)
+            a.update()
+            opened.assert_called_once()
+
     def test_no_logger_state(self):
         a = self.app
         self.spin(0.5)
