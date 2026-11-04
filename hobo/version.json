@@ -1,26 +1,110 @@
 {
-  "version": "1.0.11",
+  "version": "1.0.15",
   "pending": [],
   "history": [
     {
-      "version": "1.0.11",
+      "version": "1.0.15",
+      "date": "2026-11-04",
+      "changes": [
+        "Version numbers now match the commit count (1.0.N for commit N), with history backfilled from earlier commits."
+      ]
+    },
+    {
+      "version": "1.0.14",
       "date": "2026-11-04",
       "changes": [
         "New: version history in Settings, and a notice at the top of the app after each update telling you what changed."
       ]
     },
     {
-      "version": "1.0.10",
+      "version": "1.0.13",
       "date": "2026-11-04",
       "changes": [
         "New: Save Diagnostic Report (File menu or Settings). Saves a read-only troubleshooting file to your Desktop for when a logger won't read."
       ]
     },
     {
-      "version": "1.0.9",
-      "date": "2026-11-03",
+      "version": "1.0.12",
+      "date": "2026-10-27",
       "changes": [
-        "Earlier improvements and fixes."
+        "Update README.md"
+      ]
+    },
+    {
+      "version": "1.0.11",
+      "date": "2026-10-27",
+      "changes": [
+        "Add app icon to the README"
+      ]
+    },
+    {
+      "version": "1.0.10",
+      "date": "2026-10-27",
+      "changes": [
+        "Redraw app icon as a flat tent"
+      ]
+    },
+    {
+      "version": "1.0.9",
+      "date": "2026-10-27",
+      "changes": [
+        "Move build and technical docs out of the README into DEVELOPMENT.md"
+      ]
+    },
+    {
+      "version": "1.0.8",
+      "date": "2026-10-27",
+      "changes": [
+        "Link README install step straight to the latest DMG"
+      ]
+    },
+    {
+      "version": "1.0.7",
+      "date": "2026-10-27",
+      "changes": [
+        "Rename app to Unhoused Reader Pro"
+      ]
+    },
+    {
+      "version": "1.0.6",
+      "date": "2026-10-27",
+      "changes": [
+        "Add DMG installer script, simplify install docs, redraw app icon"
+      ]
+    },
+    {
+      "version": "1.0.5",
+      "date": "2026-10-22",
+      "changes": [
+        "Add Stop logging button and installation instructions"
+      ]
+    },
+    {
+      "version": "1.0.4",
+      "date": "2026-10-22",
+      "changes": [
+        "Add checklist card, move live reading into the status card, fix save dialog"
+      ]
+    },
+    {
+      "version": "1.0.3",
+      "date": "2026-10-22",
+      "changes": [
+        "Rebuild the app around a readout, save, launch workflow"
+      ]
+    },
+    {
+      "version": "1.0.2",
+      "date": "2026-10-22",
+      "changes": [
+        "Add window, app bundle build, connection light and icons"
+      ]
+    },
+    {
+      "version": "1.0.1",
+      "date": "2026-10-22",
+      "changes": [
+        "Add HOBO U23 logger reverse-engineering tools and sample decoder"
       ]
     }
   ]
