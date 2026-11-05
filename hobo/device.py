@@ -14,7 +14,9 @@ import usb.backend.libusb1  # noqa: E402
 import usb.core  # noqa: E402
 import usb.util  # noqa: E402
 
-VID, PID = 0x0F1B, 0x0160
+VID = 0x0F1B   # Onset Computer Corporation: any product ID from this vendor is treated as a HOBO logger
+PIDS = (0x0160, 0x011D)   # known: 0160 = U23-001A (tested), 011D = U23-001 (field; same protocol assumed)
+PID = PIDS[0]
 BLOCK = 0x40
 
 
@@ -28,14 +30,21 @@ def _backend():
     return None
 
 
+def _find():
+    """First Onset (vendor 0F1B) device on USB, preferring known product IDs."""
+    devs = list(usb.core.find(find_all=True, idVendor=VID, backend=_backend()) or [])
+    devs.sort(key=lambda d: PIDS.index(d.idProduct) if d.idProduct in PIDS else len(PIDS))
+    return devs[0] if devs else None
+
+
 def logger_present() -> bool:
     """True if a HOBO logger is visible on USB (does not open it)."""
-    return usb.core.find(idVendor=VID, idProduct=PID, backend=_backend()) is not None
+    return _find() is not None
 
 
 class Logger:
     def __init__(self):
-        self.dev = usb.core.find(idVendor=VID, idProduct=PID, backend=_backend())
+        self.dev = _find()
         if self.dev is None:
             raise RuntimeError("No HOBO logger found. Is the adapter plugged in and HOBOware closed?")
         for attempt in range(5):   # another window or poll may hold the interface for a moment

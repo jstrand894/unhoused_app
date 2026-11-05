@@ -1,7 +1,14 @@
 {
-  "version": "1.0.21",
+  "version": "1.0.22",
   "pending": [],
   "history": [
+    {
+      "version": "1.0.22",
+      "date": "2026-11-05",
+      "changes": [
+        "Fixed: loggers with a different USB product ID (such as the HOBO U23-001) are now detected. Any Onset device is accepted."
+      ]
+    },
     {
       "version": "1.0.21",
       "date": "2026-11-04",

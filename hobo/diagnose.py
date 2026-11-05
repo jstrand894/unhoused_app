@@ -128,11 +128,11 @@ def _enumerate(r: Report):
     def listing():
         devs = list(usb.core.find(find_all=True, backend=device._backend()))
         for d in devs:
-            mark = "  <== HOBO adapter" if (d.idVendor, d.idProduct) == (device.VID, device.PID) else ""
+            mark = "  <== HOBO adapter" if d.idVendor == device.VID else ""
             r.add(f"  {d.idVendor:04x}:{d.idProduct:04x}  bus {d.bus} addr {d.address}{mark}")
         return f"{len(devs)} device(s)"
     r.step("list devices", listing)
-    return usb.core.find(idVendor=device.VID, idProduct=device.PID, backend=device._backend())
+    return device._find()
 
 
 def _descriptors(r: Report, dev):
@@ -229,7 +229,7 @@ def build_report(context: dict | None = None) -> str:
         dev = _enumerate(r)
         if dev is None:
             r.h("ADAPTER")
-            r.add("The HOBO adapter (0f1b:0160) is NOT visible to libusb. If it is also missing from the macOS list "
+            r.add("The HOBO adapter (vendor 0f1b, Onset) is NOT visible to libusb. If it is also missing from the macOS list "
                   "above, the problem is the cable, port, hub or the adapter itself, not the app.")
         else:
             _descriptors(r, dev)
